@@ -1,30 +1,21 @@
 #!/usr//bin/python3
 
 import json
-import os
-import ssl
-import operator
-import requests
 import sys
 from artifactory import ArtifactoryPath
 
-
-try:
-    import requests.packages.urllib3 as urllib3
-except ImportError:
-    import urllib3
 
 jfrogURL = sys.argv[1]
 apiKey = sys.argv[2]
 repoName = str(sys.argv[3])
 artType = str(sys.argv[4])
-limits = sys.argv[5]
+limits = str(sys.argv[5])
 
 print ("jfrogURL --> "+jfrogURL+"::: apiKey--> "+apiKey+"::repoName-->"+repoName+"::artType-->"+artType+":::limits-->"+limits)
 
 def create_aql_text(*args):
     """
-    Create AQL querty from string or list or dict arguments
+    Create AQL query from string or list or dict arguments
     """
     aql_query_text = ""
     for arg in args:
@@ -36,11 +27,10 @@ def create_aql_text(*args):
     return aql_query_text
 
 # API_KEY
-#aql = ArtifactoryPath("https://"+jfrogURL+"/artifactory/api/search/aql", apikey=apiKey)
 aql = ArtifactoryPath(
     "http://"+jfrogURL+"/artifactory/api/search/aql", apikey=apiKey)
 
-
+#Forming Arguments for search.
 args = ["items.find",
             {"$and":
                 [
@@ -61,13 +51,14 @@ args1 = [".sort",
             }
         ]
 
-args2 = [".limit(2)"]
+args2 = [".limit("+limits+")"]
 
 finalargs = args + args1 + args2
 
+#This is just to check whether Query is forming correctly or not.
 aql_query_text = create_aql_text(*finalargs)
 
-print (aql_query_text)
+print ("Generated AQL query --> "+aql_query_text)
 
 # artifacts_list contains raw data (list of dict)
 # Send query:
@@ -79,6 +70,4 @@ result = json.dumps(artifacts_list)
 
 
 
-print ("Response Total data --->"+result)
-
-
+print ("Most Popupar Download Based on Search Criteria--->"+result)
